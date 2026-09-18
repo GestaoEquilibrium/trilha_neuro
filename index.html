@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equilibrium Trilhas — Neurodesenvolvimento Continuado</title>
+<meta name="description" content="Do laudo à vida real. Programa clínico de neurodesenvolvimento para adolescentes e adultos do Grupo Equilibrium.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+:root{
+  --bg:#14102B; --bg2:#1C1640; --panel:#221A4D; --panel2:#2A2159;
+  --ink:#ECE9FF; --muted:#A79FD6; --line:rgba(157,123,255,.18);
+  --violet:#7C5CFC; --violet-bright:#9D7BFF; --aqua:#22D3AA; --aqua-soft:#5AE9C8;
+  --coral:#FF8A5B; --amber:#FFC24B;
+  --light:#F5F3FF; --light-ink:#1B1440; --light-muted:#5B5486;
+  --maxw:1180px; --r:20px;
+  --grad:linear-gradient(120deg,var(--violet) 0%,var(--aqua) 100%);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:'Inter',system-ui,sans-serif; line-height:1.65;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,.display{font-family:'Bricolage Grotesque','Inter',sans-serif; line-height:1.05; letter-spacing:-.02em; font-weight:700}
+a{color:inherit;text-decoration:none}
+img{max-width:100%}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 26px}
+.section{position:relative; padding:120px 0}
+.eyebrow{display:inline-flex; align-items:center; gap:9px; font-size:.82rem; font-weight:600; color:var(--aqua-soft); letter-spacing:.01em; margin-bottom:20px}
+.eyebrow::before{content:""; width:26px; height:2px; background:var(--grad); border-radius:2px}
+.h-xl{font-size:clamp(2.4rem,6vw,4.6rem)}
+.h-lg{font-size:clamp(2rem,4.6vw,3.3rem)}
+.h-md{font-size:clamp(1.5rem,3vw,2.1rem)}
+.lead{font-size:clamp(1.05rem,1.6vw,1.28rem); color:var(--muted); max-width:62ch}
+.muted{color:var(--muted)}
+.accent-a{color:var(--aqua-soft)} .accent-v{color:var(--violet-bright)} .accent-c{color:var(--coral)}
+
+/* ---------- NAV ---------- */
+.nav{position:fixed; top:0; left:0; right:0; z-index:60; padding:16px 0;
+  transition:.35s; backdrop-filter:blur(0px);}
+.nav.scrolled{background:rgba(20,16,43,.82); backdrop-filter:blur(14px); border-bottom:1px solid var(--line); padding:11px 0}
+.nav .wrap{display:flex; align-items:center; justify-content:space-between}
+.brand{display:flex; align-items:center; gap:12px; font-family:'Bricolage Grotesque'; font-weight:700; font-size:1.12rem}
+.brand .dot{width:34px;height:34px;border-radius:11px;background:var(--grad); display:grid;place-items:center; box-shadow:0 6px 20px rgba(124,92,252,.5)}
+.brand .dot svg{width:20px;height:20px}
+.nav-links{display:flex; gap:30px; font-size:.92rem; font-weight:500}
+.nav-links a{color:var(--muted); transition:.2s; position:relative}
+.nav-links a:hover{color:var(--ink)}
+.nav-cta{background:var(--grad); color:#160f2e!important; font-weight:700; padding:10px 20px; border-radius:12px; font-size:.9rem; box-shadow:0 8px 24px rgba(124,92,252,.35); transition:.25s}
+.nav-cta:hover{transform:translateY(-2px); box-shadow:0 12px 30px rgba(34,211,170,.4)}
+.burger{display:none;flex-direction:column;gap:5px;cursor:pointer}
+.burger span{width:24px;height:2px;background:var(--ink);border-radius:2px;transition:.3s}
+
+/* ---------- HERO ---------- */
+.hero{position:relative; min-height:100vh; display:flex; align-items:center; overflow:hidden}
+#neural{position:absolute; inset:0; z-index:0}
+.hero-glow{position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:radial-gradient(60% 55% at 72% 42%, rgba(124,92,252,.28), transparent 70%),
+             radial-gradient(45% 45% at 15% 75%, rgba(34,211,170,.18), transparent 70%);}
+.hero .wrap{position:relative; z-index:2; width:100%}
+.hero-badge{display:inline-flex;align-items:center;gap:10px; background:rgba(34,27,77,.6); border:1px solid var(--line);
+  padding:8px 16px; border-radius:100px; font-size:.85rem; color:var(--aqua-soft); margin-bottom:26px; backdrop-filter:blur(6px)}
+.hero-badge .pulse{width:8px;height:8px;border-radius:50%;background:var(--aqua); box-shadow:0 0 0 0 rgba(34,211,170,.6); animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,211,170,.5)}70%{box-shadow:0 0 0 12px rgba(34,211,170,0)}100%{box-shadow:0 0 0 0 rgba(34,211,170,0)}}
+.hero h1{max-width:16ch; margin-bottom:24px}
+.hero h1 .grad{background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent}
+.hero-sub{max-width:56ch; margin-bottom:36px; font-size:clamp(1.05rem,1.7vw,1.32rem)}
+.hero-actions{display:flex; gap:16px; flex-wrap:wrap; align-items:center}
+.btn{display:inline-flex;align-items:center;gap:10px; font-weight:700; padding:15px 28px; border-radius:14px; cursor:pointer; border:none; font-size:1rem; transition:.28s; font-family:inherit}
+.btn-primary{background:var(--grad); color:#140f2b; box-shadow:0 14px 34px rgba(124,92,252,.4)}
+.btn-primary:hover{transform:translateY(-3px); box-shadow:0 18px 42px rgba(34,211,170,.45)}
+.btn-ghost{background:rgba(255,255,255,.05); border:1px solid var(--line); color:var(--ink)}
+.btn-ghost:hover{background:rgba(255,255,255,.09); border-color:var(--violet)}
+.hero-stats{display:flex; gap:40px; margin-top:60px; flex-wrap:wrap}
+.hero-stats .s b{font-family:'Bricolage Grotesque'; font-size:2.1rem; background:var(--grad); -webkit-background-clip:text;background-clip:text;color:transparent; display:block; line-height:1}
+.hero-stats .s span{font-size:.85rem; color:var(--muted)}
+.scroll-hint{position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:3; color:var(--muted); font-size:.78rem; display:flex;flex-direction:column;align-items:center;gap:8px}
+.scroll-hint .mouse{width:22px;height:36px;border:2px solid var(--muted);border-radius:12px;position:relative}
+.scroll-hint .mouse::after{content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);width:4px;height:7px;background:var(--aqua);border-radius:2px;animation:scrolldot 1.6s infinite}
+@keyframes scrolldot{0%{opacity:0;top:6px}40%{opacity:1}80%{opacity:0;top:16px}}
+
+/* ---------- REVEAL ---------- */
+.reveal{opacity:0; transform:translateY(38px)}
+.section-head{max-width:70ch; margin-bottom:56px}
+.section-head.center{margin-left:auto;margin-right:auto;text-align:center}
+.section-head.center .lead{margin-left:auto;margin-right:auto}
+
+/* ---------- WHAT / cards ---------- */
+.grid{display:grid; gap:22px}
+.g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+.card{background:linear-gradient(160deg,var(--panel),var(--bg2)); border:1px solid var(--line); border-radius:var(--r); padding:30px; transition:.35s; position:relative; overflow:hidden}
+.card:hover{transform:translateY(-6px); border-color:rgba(157,123,255,.4); box-shadow:0 22px 50px rgba(0,0,0,.35)}
+.card .ic{width:52px;height:52px;border-radius:14px; display:grid;place-items:center; margin-bottom:18px; background:rgba(124,92,252,.15); color:var(--violet-bright)}
+.card .ic svg{width:26px;height:26px}
+.card h3{font-size:1.22rem; margin-bottom:10px}
+.card p{color:var(--muted); font-size:.96rem}
+.card.aqua .ic{background:rgba(34,211,170,.14); color:var(--aqua-soft)}
+.card.coral .ic{background:rgba(255,138,91,.15); color:var(--coral)}
+.card.amber .ic{background:rgba(255,194,75,.15); color:var(--amber)}
+
+/* problem/opportunity split */
+.split{display:grid; grid-template-columns:1fr 1fr; gap:24px}
+.panelbox{border-radius:var(--r); padding:34px; border:1px solid var(--line)}
+.panelbox.prob{background:linear-gradient(160deg,#2a1636,#1d1233)}
+.panelbox.opp{background:linear-gradient(160deg,#122e2c,#13233a)}
+.panelbox h3{display:flex;align-items:center;gap:12px; font-size:1.35rem; margin-bottom:20px}
+.panelbox ul{list-style:none; display:flex;flex-direction:column;gap:14px}
+.panelbox li{display:flex;gap:12px;align-items:flex-start; color:var(--muted); font-size:.98rem}
+.panelbox li .b{flex:none;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;margin-top:2px;font-size:.7rem}
+.prob li .b{background:rgba(255,138,91,.18);color:var(--coral)}
+.opp li .b{background:rgba(34,211,170,.18);color:var(--aqua-soft)}
+.opp li b{color:var(--ink)}
+
+/* ---------- TRILHAS (tabs) ---------- */
+.tabs{display:flex;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:7px;width:max-content;margin:0 auto 46px}
+.tab{padding:13px 30px;border-radius:11px;font-weight:700;cursor:pointer;color:var(--muted);transition:.3s;font-size:1rem;display:flex;align-items:center;gap:10px;border:none;background:none;font-family:inherit}
+.tab.active{color:#140f2b}
+.tab.active.jovem{background:linear-gradient(120deg,var(--coral),var(--amber))}
+.tab.active.adulto{background:var(--grad)}
+.trilha{display:none}
+.trilha.active{display:block; animation:fadeUp .5s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.trilha-hero{display:grid;grid-template-columns:1.1fr .9fr;gap:36px;align-items:start;margin-bottom:10px}
+.trilha-hero .age{font-family:'Bricolage Grotesque';font-size:3.4rem;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.trilha.jovem .age{background:linear-gradient(120deg,var(--coral),var(--amber));-webkit-background-clip:text;background-clip:text;color:transparent}
+.chiprow{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.chip{background:rgba(124,92,252,.13);border:1px solid var(--line);border-radius:100px;padding:8px 16px;font-size:.86rem;color:var(--ink)}
+.trilha.jovem .chip{background:rgba(255,138,91,.13)}
+.mini{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.mini .m{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.mini .m b{display:block;font-size:.82rem;color:var(--aqua-soft);margin-bottom:6px}
+.trilha.jovem .mini .m b{color:var(--amber)}
+.mini .m span{font-size:.9rem;color:var(--muted)}
+
+/* ---------- ECOSYSTEM ---------- */
+.eco{position:relative}
+.eco-center{text-align:center;margin:0 auto 10px;max-width:340px;background:var(--grad);border-radius:22px;padding:26px;color:#140f2b;box-shadow:0 20px 50px rgba(124,92,252,.4)}
+.eco-center b{font-family:'Bricolage Grotesque';font-size:1.4rem;display:block}
+.eco-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:34px}
+.eco-node{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;transition:.3s;position:relative}
+.eco-node:hover{border-color:var(--aqua);transform:translateY(-5px)}
+.eco-node .t{display:flex;align-items:center;gap:11px;font-weight:700;margin-bottom:8px;font-size:1.02rem;padding-right:78px;min-height:38px}
+.eco-node .t i{width:34px;height:34px;border-radius:10px;background:rgba(34,211,170,.14);display:grid;place-items:center;color:var(--aqua-soft);font-style:normal;font-weight:700}
+.eco-node p{font-size:.9rem;color:var(--muted)}
+.eco-node .status{position:absolute;top:16px;right:16px;font-size:.68rem;font-weight:700;padding:4px 9px;border-radius:100px}
+.st-ready{background:rgba(34,211,170,.16);color:var(--aqua-soft)}
+.st-ext{background:rgba(255,194,75,.16);color:var(--amber)}
+
+/* ---------- METRICS ---------- */
+.metrics-wrap{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px}
+.stat .num{font-family:'Bricolage Grotesque';font-size:2.6rem;line-height:1;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .lab{font-size:.86rem;color:var(--muted);margin-top:8px}
+.bars{display:flex;flex-direction:column;gap:20px}
+.bar-item .bl{display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:8px}
+.bar-item .bl b{color:var(--ink)}
+.bar-track{height:12px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden}
+.bar-fill{height:100%;border-radius:100px;width:0;background:var(--grad);transition:width 1.4s cubic-bezier(.2,.8,.2,1)}
+.bar-fill.c2{background:linear-gradient(120deg,var(--coral),var(--amber))}
+.instrument-tags{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+.itag{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:10px 15px;font-size:.85rem}
+.itag b{color:var(--aqua-soft)}
+
+/* ---------- PROCESS TRAIL ---------- */
+.trail{position:relative;padding-left:0}
+.trail-line{position:absolute;left:31px;top:20px;bottom:20px;width:3px;background:rgba(157,123,255,.15);border-radius:3px;overflow:hidden}
+.trail-line .fill{position:absolute;top:0;left:0;right:0;height:0;background:var(--grad);border-radius:3px}
+.phase{position:relative;padding-left:84px;padding-bottom:44px}
+.phase:last-child{padding-bottom:0}
+.phase .node{position:absolute;left:16px;top:2px;width:34px;height:34px;border-radius:50%;background:var(--bg2);border:3px solid var(--violet);display:grid;place-items:center;font-weight:700;font-family:'Bricolage Grotesque';color:var(--violet-bright);z-index:2;transition:.4s}
+.phase.on .node{background:var(--grad);border-color:transparent;color:#140f2b;box-shadow:0 0 0 8px rgba(124,92,252,.15)}
+.phase h3{font-size:1.3rem;margin-bottom:8px}
+.phase .when{font-size:.8rem;color:var(--aqua-soft);font-weight:600;margin-bottom:10px}
+.phase p{color:var(--muted);font-size:.98rem;max-width:60ch}
+
+/* ---------- GAMES ---------- */
+.game-demo{background:linear-gradient(160deg,var(--panel2),var(--bg2));border:1px solid var(--line);border-radius:24px;padding:34px;display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center;margin-bottom:24px}
+.game-demo .meta .tagline{font-size:.8rem;font-weight:700;color:var(--aqua-soft);margin-bottom:12px}
+.game-demo h3{font-size:1.7rem;margin-bottom:12px}
+.game-demo p{color:var(--muted);margin-bottom:16px}
+.game-skills{display:flex;flex-wrap:wrap;gap:8px}
+.game-skills span{font-size:.78rem;background:rgba(124,92,252,.14);border:1px solid var(--line);padding:6px 12px;border-radius:100px;color:var(--violet-bright)}
+.demo-stage{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:26px;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;text-align:center}
+/* face demo */
+.face-svg{width:150px;height:150px;filter:drop-shadow(0 10px 24px rgba(0,0,0,.4))}
+.emo-options{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;width:100%}
+.emo-btn{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;font-weight:600;font-family:inherit;color:var(--ink);transition:.2s;font-size:.92rem}
+.emo-btn:hover{border-color:var(--violet);transform:translateY(-2px)}
+.emo-btn.right{background:rgba(34,211,170,.18);border-color:var(--aqua)}
+.emo-btn.wrong{background:rgba(255,138,91,.15);border-color:var(--coral)}
+.demo-feedback{font-size:.92rem;min-height:22px;font-weight:600}
+.demo-score{font-size:.8rem;color:var(--muted)}
+/* radar demo */
+.radar-body{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.sens{background:var(--panel);border:1px solid var(--line);border-radius:100px;padding:10px 16px;cursor:pointer;font-size:.88rem;transition:.2s;font-family:inherit;color:var(--ink)}
+.sens:hover{border-color:var(--aqua);transform:translateY(-2px)}
+.sens.active{background:var(--grad);color:#140f2b;border-color:transparent}
+.radar-out{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;width:100%;text-align:left;opacity:0;transform:translateY(10px);transition:.4s}
+.radar-out.show{opacity:1;transform:none}
+.radar-out .emo{font-family:'Bricolage Grotesque';font-size:1.3rem;color:var(--aqua-soft);margin-bottom:6px}
+.radar-out .str{font-size:.9rem;color:var(--muted)}
+/* game idea cards */
+.idea-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:30px}
+.idea{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px;transition:.3s;cursor:default}
+.idea:hover{transform:translateY(-5px);border-color:var(--violet)}
+.idea .emoji{font-size:1.7rem;margin-bottom:12px;display:block;width:48px;height:48px;border-radius:13px;background:rgba(124,92,252,.13);display:grid;place-items:center}
+.idea h4{font-size:1.08rem;margin-bottom:7px}
+.idea p{font-size:.87rem;color:var(--muted);margin-bottom:12px}
+.idea .tag{font-size:.72rem;color:var(--aqua-soft);font-weight:700}
+
+/* ---------- ROADMAP ---------- */
+.road{display:grid;grid-template-columns:repeat(6,1fr);gap:14px;counter-reset:step}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 18px;position:relative;transition:.3s}
+.step:hover{transform:translateY(-5px);border-color:var(--aqua)}
+.step .n{font-family:'Bricolage Grotesque';font-size:.85rem;color:var(--aqua-soft);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.step .n i{width:9px;height:9px;border-radius:50%;background:var(--aqua);display:inline-block}
+.step h4{font-size:1rem;margin-bottom:8px}
+.step p{font-size:.82rem;color:var(--muted)}
+.step .dur{font-size:.72rem;color:var(--violet-bright);font-weight:700;margin-top:10px}
+
+/* ---------- CTA / FOOTER ---------- */
+.cta{background:linear-gradient(135deg,var(--violet),var(--aqua));border-radius:32px;padding:70px 50px;text-align:center;position:relative;overflow:hidden}
+.cta::before{content:"";position:absolute;inset:0;background:radial-gradient(40% 60% at 20% 20%,rgba(255,255,255,.25),transparent)}
+.cta h2{color:#130d29;position:relative;margin-bottom:16px}
+.cta p{color:#241a45;position:relative;max-width:56ch;margin:0 auto 30px;font-weight:500}
+.cta .btn-primary{background:#140f2b;color:var(--ink);box-shadow:0 16px 40px rgba(0,0,0,.3);position:relative}
+.cta .btn-primary:hover{background:#0d0a1f}
+footer{padding:56px 0 46px;border-top:1px solid var(--line);margin-top:110px}
+footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px}
+footer .muted{font-size:.86rem}
+.owner{font-size:.82rem;color:var(--muted)}
+.owner b{color:var(--ink)}
+
+/* ---------- RESPONSIVE ---------- */
+@media(max-width:920px){
+  .nav-links{display:none} .burger{display:flex}
+  .g2,.g3,.g4,.split,.metrics-wrap,.trilha-hero,.game-demo,.eco-grid,.idea-grid{grid-template-columns:1fr}
+  .road{grid-template-columns:repeat(2,1fr)}
+  .section{padding:80px 0}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .hero-stats{gap:26px}
+}
+@media(max-width:520px){
+  .road,.stat-grid,.mini{grid-template-columns:1fr}
+  .tabs{width:100%} .tab{flex:1;justify-content:center;padding:12px 10px;font-size:.9rem}
+  .cta{padding:48px 24px}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important; transition:none!important; scroll-behavior:auto!important}
+  .reveal{opacity:1!important; transform:none!important}
+}
+</style>
+</head>
+<body>
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#160f2e" stroke-width="2.2" stroke-linecap="round"><path d="M4 12h4l2-6 4 12 2-6h4"/></svg></span>
+      Equilibrium <span style="color:var(--aqua-soft)">Trilhas</span>
+    </a>
+    <div class="nav-links">
+      <a href="#oque">O que é</a>
+      <a href="#trilhas">Trilhas</a>
+      <a href="#encaixe">Encaixe</a>
+      <a href="#metricas">Métricas</a>
+      <a href="#jogos">Jogos</a>
+      <a href="#comecar">Como começar</a>
+    </div>
+    <a href="#cta" class="nav-cta">Iniciar o piloto</a>
+    <div class="burger" id="burger"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero" id="top">
+  <canvas id="neural"></canvas>
+  <div class="hero-glow"></div>
+  <div class="wrap">
+    <div class="hero-badge"><span class="pulse"></span> Neurodesenvolvimento continuado · Grupo Equilibrium</div>
+    <h1 class="h-xl">Do laudo à <span class="grad">vida real</span>.</h1>
+    <p class="hero-sub muted">A avaliação neuropsicológica termina com um mapa. O <b style="color:var(--ink)">Equilibrium Trilhas</b> é o caminho — um programa clínico que transforma as recomendações do laudo em desenvolvimento de habilidades sociais, autonomia e trabalho, para <b style="color:var(--ink)">adolescentes e adultos</b>.</p>
+    <div class="hero-actions">
+      <a href="#oque" class="btn btn-primary">Conhecer o programa
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a href="#jogos" class="btn btn-ghost">Ver os jogos interativos</a>
+    </div>
+    <div class="hero-stats">
+      <div class="s"><b>2</b><span>trilhas por fase de vida</span></div>
+      <div class="s"><b>4</b><span>domínios de desenvolvimento</span></div>
+      <div class="s"><b>~80%</b><span>da estrutura já existe</span></div>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="mouse"></div>role para explorar</div>
+</header>
+
+<!-- O QUE É -->
+<section class="section" id="oque">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">O que é</div>
+      <h2 class="h-lg">Um programa que ativa o laudo.</h2>
+      <p class="lead">Hoje, a avaliação neuropsicológica entrega um diagnóstico e uma lista de recomendações. Na prática, essas recomendações raramente viram intervenção — e o valor clínico da avaliação se perde. O Trilhas fecha esse ciclo: pega a seção de conduta do laudo e a transforma num plano de desenvolvimento individualizado, particular e mensurável.</p>
+    </div>
+    <div class="grid g4">
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+        <h3>Individualizado</h3>
+        <p>Cada paciente sai da avaliação com um perfil único. As metas de trabalho nascem direto do laudo — não de um currículo genérico.</p>
+      </div>
+      <div class="card aqua reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <h3>Funcional</h3>
+        <p>O foco é a vida: iniciar uma conversa, manter um emprego, organizar a rotina, lidar com o dia a dia — não repetir tarefas de consultório.</p>
+      </div>
+      <div class="card coral reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+        <h3>Mensurável</h3>
+        <p>Instrumentos validados aplicados antes e depois. Você prova o resultado com dado — o mesmo rigor da avaliação, agora na intervenção.</p>
+      </div>
+      <div class="card amber reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></div>
+        <h3>Empacotado</h3>
+        <p>Vendido como trilha fechada de duração definida. Receita previsível, sem depender de repasse ou de convênio.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POR QUE -->
+<section class="section" id="porque" style="background:linear-gradient(180deg,transparent,rgba(28,22,64,.5),transparent)">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Por que faz sentido</div>
+      <h2 class="h-lg">O problema de hoje é a<br>oportunidade do programa.</h2>
+    </div>
+    <div class="split">
+      <div class="panelbox prob reveal">
+        <h3><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#FF8A5B" stroke-width="2" stroke-linecap="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg> O que se perde hoje</h3>
+        <ul>
+          <li><span class="b">✕</span> O laudo termina em recomendações que vão para serviços que a clínica não controla — ou não viram nada.</li>
+          <li><span class="b">✕</span> O paciente sai sabendo <i>"o que tenho"</i>, mas sem <i>"o que fazer com isso"</i>.</li>
+          <li><span class="b">✕</span> Adolescentes e adultos neurodivergentes têm poucos serviços estruturados de continuidade no mercado.</li>
+          <li><span class="b">✕</span> O relacionamento com o paciente (e o valor clínico gerado) se encerra na entrega do documento.</li>
+        </ul>
+      </div>
+      <div class="panelbox opp reveal">
+        <h3><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#5AE9C8" stroke-width="2" stroke-linecap="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/></svg> O que o Trilhas captura</h3>
+        <ul>
+          <li><span class="b">✓</span> <b>O funil mais qualificado e barato que existe:</b> o paciente já foi avaliado, já está no prédio e já confia.</li>
+          <li><span class="b">✓</span> <b>Responde ao "e agora?"</b> — a pergunta que todo paciente e família fazem na devolutiva.</li>
+          <li><span class="b">✓</span> <b>Posicionamento de diferenciação:</b> continuidade medida pós-avaliação é raro e defensável.</li>
+          <li><span class="b">✓</span> <b>Aumenta o LTV do paciente</b> com receita recorrente e previsível por coorte.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- TRILHAS -->
+<section class="section" id="trilhas">
+  <div class="wrap">
+    <div class="section-head center reveal">
+      <div class="eyebrow" style="justify-content:center">As duas trilhas</div>
+      <h2 class="h-lg">Fases de vida diferentes,<br>linguagens diferentes.</h2>
+      <p class="lead">Mesma espinha metodológica, conteúdo e linguagem distintos. Alterne entre as trilhas:</p>
+    </div>
+
+    <div class="tabs reveal">
+      <button class="tab jovem active" data-t="jovem">🎮 Trilha Jovem · 12–17</button>
+      <button class="tab adulto" data-t="adulto">💼 Trilha Adulto · 18+</button>
+    </div>
+
+    <!-- JOVEM -->
+    <div class="trilha jovem active" data-trilha="jovem">
+      <div class="trilha-hero">
+        <div>
+          <div class="age">12–17</div>
+          <h3 class="h-md" style="margin:10px 0 14px">O mundo é escola, amizade e identidade.</h3>
+          <p class="muted">A linguagem é concreta e gamificada: jogos de leitura social, missões da semana, sistema de pontos e conquistas, reforço visual. A família entra como co-terapeuta e há ponte com a escola.</p>
+          <div class="chiprow">
+            <span class="chip">Amizade e pertencimento</span>
+            <span class="chip">Rotina e estudos</span>
+            <span class="chip">Regulação emocional</span>
+            <span class="chip">Autonomia emergente</span>
+            <span class="chip">Telas e redes</span>
+          </div>
+        </div>
+        <div class="mini">
+          <div class="m"><b>Linguagem</b><span>Jogos, missões, role-play, conquistas visuais</span></div>
+          <div class="m"><b>Quem apoia</b><span>Família treinada + ponte com a escola</span></div>
+          <div class="m"><b>Exemplo de meta</b><span>"Inicia e sustenta uma conversa com um colega"</span></div>
+          <div class="m"><b>Generalização</b><span>Puxar conversa com um colega-alvo na semana</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADULTO -->
+    <div class="trilha adulto" data-trilha="adulto">
+      <div class="trilha-hero">
+        <div>
+          <div class="age">18+</div>
+          <h3 class="h-md" style="margin:10px 0 14px">O mundo é trabalho, autonomia e relação.</h3>
+          <p class="muted">A linguagem é de coaching e tarefa do mundo real: ensaiar a entrevista, decidir se revela o diagnóstico no trabalho, comparecer sozinho a um compromisso. Quem acompanha muitas vezes é o parceiro, não os pais — e há ponte com empregadores.</p>
+          <div class="chiprow">
+            <span class="chip">Inserção e permanência no trabalho</span>
+            <span class="chip">Vida independente</span>
+            <span class="chip">Autoadvocacia</span>
+            <span class="chip">Relacionamento íntimo</span>
+            <span class="chip">Gestão de dinheiro e tempo</span>
+          </div>
+        </div>
+        <div class="mini">
+          <div class="m"><b>Linguagem</b><span>Coaching, simulação, tarefas do mundo real</span></div>
+          <div class="m"><b>Quem apoia</b><span>Parceiro/família + ponte com o trabalho (Callink)</span></div>
+          <div class="m"><b>Exemplo de meta</b><span>"Mantém um emprego por 6 meses"</span></div>
+          <div class="m"><b>Generalização</b><span>Ensaiar e comparecer a uma entrevista real</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOMÍNIOS -->
+<section class="section" id="dominios" style="background:linear-gradient(180deg,transparent,rgba(28,22,64,.5),transparent)">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">O que engloba</div>
+      <h2 class="h-lg">Quatro domínios de desenvolvimento.</h2>
+      <p class="lead">Ancorados em protocolos que já têm evidência e material pronto — nada é inventado do zero.</p>
+    </div>
+    <div class="grid g2">
+      <div class="card reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 8a5 5 0 0 0-10 0c0 2 1 3 1 5H16c0-2 1-3 1-5z"/><path d="M9 18h6M10 21h4M12 3V1"/></svg></div>
+        <h3>1 · Habilidades sociais e cognição social</h3>
+        <p>O coração do programa: leitura de pistas, iniciar e manter conversa, resolver conflito, interpretar contexto. Base: <b style="color:var(--ink)">THS Del Prette (IHS/SATEPSI)</b> e, para TEA, o <b style="color:var(--ink)">PEERS (UCLA)</b>.</p>
+      </div>
+      <div class="card aqua reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v16"/></svg></div>
+        <h3>2 · Funções executivas e AVDs</h3>
+        <p>Planejamento, organização, gestão de tempo, rotina, autocuidado, dinheiro, autonomia. Profissional-chave: o <b style="color:var(--ink)">terapeuta ocupacional</b>, com coaching executivo estruturado.</p>
+      </div>
+      <div class="card coral reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
+        <h3>3 · Inserção e permanência (trabalho/escola)</h3>
+        <p>Prontidão, entrevista, comunicação no ambiente, decisão de revelar ou não o diagnóstico, autoadvocacia. Modelo com evidência: <b style="color:var(--ink)">emprego apoiado</b> — com a ponte Callink para empregadores reais.</p>
+      </div>
+      <div class="card amber reveal">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+        <h3>4 · Autorregulação emocional e sensorial</h3>
+        <p>Ansiedade comórbida é quase regra neste público. Regulação emocional e sensorial com base em <b style="color:var(--ink)">TCC e ABA</b> sustenta todo o resto do programa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ENCAIXE / ECOSSISTEMA -->
+<section class="section" id="encaixe">
+  <div class="wrap">
+    <div class="section-head center reveal">
+      <div class="eyebrow" style="justify-content:center">Onde encaixa</div>
+      <h2 class="h-lg">80% da infraestrutura<br>já está de pé.</h2>
+      <p class="lead">Isto é montagem, não construção. O Trilhas se apoia em ativos que o Grupo Equilibrium já opera:</p>
+    </div>
+    <div class="eco">
+      <div class="eco-center reveal">
+        <b>Equilibrium Trilhas</b>
+        <span style="font-size:.9rem">o degrau que faltava depois da avaliação</span>
+      </div>
+      <div class="eco-grid">
+        <div class="eco-node reveal"><span class="status st-ready">JÁ EXISTE</span><div class="t"><i>🧭</i> Avaliação neuropsicológica</div><p>O funil já roda todos os dias. Falta só o próximo degrau — a devolutiva vira a porta de entrada.</p></div>
+        <div class="eco-node reveal"><span class="status st-ready">JÁ EXISTE</span><div class="t"><i>🏥</i> EQ1 e EQ2</div><p>Unidades de adultos e infantil com espaço físico e equipes já instaladas.</p></div>
+        <div class="eco-node reveal"><span class="status st-ready">JÁ EXISTE</span><div class="t"><i>👥</i> Equipe clínica</div><p>Psicólogos e aplicadores no time. Falta formalizar o TO e capacitar no protocolo escolhido.</p></div>
+        <div class="eco-node reveal"><span class="status st-ext">EXTENSÃO</span><div class="t"><i>💻</i> CORTEX</div><p>Já gerencia pacientes e instrumentos. Adicionar módulo de metas, GAS e evolução é passo natural.</p></div>
+        <div class="eco-node reveal"><span class="status st-ready">JÁ EXISTE</span><div class="t"><i>🤝</i> Parceria Callink</div><p>Ponte pronta com empregadores para o emprego apoiado da Trilha Adulto.</p></div>
+        <div class="eco-node reveal"><span class="status st-ready">JÁ EXISTE</span><div class="t"><i>🌐</i> Contigo / Colo</div><p>Espaço digital de comunidade e generalização — onde a habilidade treinada vira vida.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- MÉTRICAS -->
+<section class="section" id="metricas" style="background:linear-gradient(180deg,transparent,rgba(28,22,64,.5),transparent)">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Estratégia e métricas</div>
+      <h2 class="h-lg">O rigor vira diferencial competitivo.</h2>
+      <p class="lead">Medir antes e depois transforma um serviço em prova. Bom para o paciente, defensável na clínica e poderoso no marketing.</p>
+    </div>
+    <div class="metrics-wrap">
+      <div class="reveal">
+        <h3 class="h-md" style="margin-bottom:8px">Desfecho clínico</h3>
+        <p class="muted" style="margin-bottom:22px;font-size:.96rem">Aplicados na linha de base e na reavaliação de desfecho.</p>
+        <div class="instrument-tags">
+          <div class="itag"><b>IHS-Del-Prette</b> · habilidades sociais</div>
+          <div class="itag"><b>BRIEF-A</b> · funções executivas</div>
+          <div class="itag"><b>Vineland-3 / ABAS-3</b> · comportamento adaptativo</div>
+          <div class="itag"><b>GAS</b> · metas individualizadas ★</div>
+          <div class="itag"><b>Escalas de ansiedade/humor</b> · conforme caso</div>
+        </div>
+        <div style="margin-top:26px;padding:20px;background:rgba(34,211,170,.08);border:1px solid var(--line);border-radius:14px">
+          <b style="color:var(--aqua-soft)">★ Goal Attainment Scaling</b>
+          <p class="muted" style="font-size:.9rem;margin-top:6px">A estrela do modelo individual: mede exatamente as metas funcionais específicas de cada paciente. Dá defensabilidade clínica e material real de marketing.</p>
+        </div>
+      </div>
+      <div class="reveal">
+        <h3 class="h-md" style="margin-bottom:8px">Indicadores de negócio</h3>
+        <p class="muted" style="margin-bottom:22px;font-size:.96rem">O que o piloto precisa provar. Metas iniciais ilustrativas — você calibra com os dados reais.</p>
+        <div class="bars" id="bars">
+          <div class="bar-item"><div class="bl"><span>Conversão avaliação → programa</span><b>meta ~20%</b></div><div class="bar-track"><div class="bar-fill" data-w="20"></div></div></div>
+          <div class="bar-item"><div class="bl"><span>Conclusão da trilha por coorte</span><b>meta ~75%</b></div><div class="bar-track"><div class="bar-fill c2" data-w="75"></div></div></div>
+          <div class="bar-item"><div class="bl"><span>Metas GAS atingidas</span><b>meta ~70%</b></div><div class="bar-track"><div class="bar-fill" data-w="70"></div></div></div>
+          <div class="bar-item"><div class="bl"><span>Satisfação (NPS)</span><b>meta 70+</b></div><div class="bar-track"><div class="bar-fill c2" data-w="85"></div></div></div>
+        </div>
+        <div class="stat-grid" style="margin-top:26px">
+          <div class="stat"><div class="num" data-count="6" data-suffix="–8">0</div><div class="lab">pacientes na 1ª coorte-piloto</div></div>
+          <div class="stat"><div class="num" data-count="12" data-suffix="–16">0</div><div class="lab">semanas por trilha</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESSO / TRILHA -->
+<section class="section" id="processo">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Processos · o pacote</div>
+      <h2 class="h-lg">Quatro fases, uma trilha fechada.</h2>
+      <p class="lead">A estrutura é fixa (replicável); o conteúdo dentro dela é individualizado a partir do laudo. A generalização corre em paralelo, não depois.</p>
+    </div>
+    <div class="trail" id="trail">
+      <div class="trail-line"><div class="fill" id="trailFill"></div></div>
+      <div class="phase reveal"><div class="node">1</div>
+        <h3>Entrada e linha de base</h3>
+        <div class="when">a partir do laudo</div>
+        <p>Traduz as recomendações da avaliação em metas funcionais de vida, junto com paciente e família. Aplica os instrumentos de base e monta o GAS individualizado. É aqui que o laudo vira plano.</p>
+      </div>
+      <div class="phase reveal"><div class="node">2</div>
+        <h3>Trilha de desenvolvimento</h3>
+        <div class="when">ao longo de 12–16 semanas</div>
+        <p>As sessões individualizadas por domínio — habilidades sociais, funções executivas, inserção, regulação. Estrutura de sessão fixa, recheio personalizado. Equipe pode ser multi (psicólogo + TO) sobre o mesmo caso, com um clínico coordenando.</p>
+      </div>
+      <div class="phase reveal"><div class="node">3</div>
+        <h3>Generalização</h3>
+        <div class="when">em paralelo à fase 2</div>
+        <p>O ponto que faz ou quebra o modelo individual: tarefa <i>in vivo</i> toda semana em contexto real, família/parceiro treinado como parceiro de prática, e sessões pontuais em ambiente real. É o que leva a habilidade da sala para a vida.</p>
+      </div>
+      <div class="phase reveal"><div class="node">4</div>
+        <h3>Reavaliação e desfecho</h3>
+        <div class="when">fechamento do ciclo</div>
+        <p>Reaplica os instrumentos, mede o antes/depois e decide: alta, nova trilha ou o lab de grupo. Clinicamente justificada, faturável, e fecha o ciclo com dado — o seu diferencial.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- JOGOS -->
+<section class="section" id="jogos" style="background:linear-gradient(180deg,transparent,rgba(28,22,64,.6),transparent)">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Demonstrativos de ideias</div>
+      <h2 class="h-lg">Jogos pensados para o neurodesenvolvimento.</h2>
+      <p class="lead">Digitais (no CORTEX) ou físicos (na sessão), cada jogo treina um alvo clínico específico. Experimente dois protótipos abaixo — e veja mais conceitos na sequência.</p>
+    </div>
+
+    <!-- DEMO 1: LEITURA DE PISTAS -->
+    <div class="game-demo reveal">
+      <div class="meta">
+        <div class="tagline">DEMO INTERATIVO · COGNIÇÃO SOCIAL</div>
+        <h3>Leitura de Pistas</h3>
+        <p>O jogo mostra uma expressão e o jogador identifica a emoção. Treina reconhecimento de pistas faciais — a base da cognição social. Níveis vão de emoções básicas a microexpressões e contexto ambíguo.</p>
+        <div class="game-skills"><span>Reconhecimento emocional</span><span>Teoria da mente</span><span>Atenção a detalhes sociais</span></div>
+      </div>
+      <div class="demo-stage">
+        <svg class="face-svg" id="face" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="#2A2159" stroke="#7C5CFC" stroke-width="2"/>
+          <g id="eyes"><circle cx="37" cy="43" r="4.5" fill="#ECE9FF"/><circle cx="63" cy="43" r="4.5" fill="#ECE9FF"/></g>
+          <g id="brows" stroke="#ECE9FF" stroke-width="3" stroke-linecap="round"><line id="bl" x1="30" y1="33" x2="44" y2="33"/><line id="br" x1="56" y1="33" x2="70" y2="33"/></g>
+          <path id="mouth" d="M36 64 Q50 72 64 64" fill="none" stroke="#5AE9C8" stroke-width="3.5" stroke-linecap="round"/>
+        </svg>
+        <div class="emo-options" id="emoOptions"></div>
+        <div class="demo-feedback" id="faceFb">Que emoção é esta?</div>
+        <div class="demo-score" id="faceScore">Acertos: 0 / rodadas: 0</div>
+      </div>
+    </div>
+
+    <!-- DEMO 2: RADAR EMOCIONAL -->
+    <div class="game-demo reveal">
+      <div class="meta">
+        <div class="tagline">DEMO INTERATIVO · AUTORREGULAÇÃO</div>
+        <h3>Radar Emocional</h3>
+        <p>O jogador aponta o que sente no corpo; o jogo nomeia a emoção provável e sugere uma estratégia de regulação. Treina interocepção — perceber o sinal corporal antes que ele vire crise.</p>
+        <div class="game-skills"><span>Interocepção</span><span>Nomear emoções</span><span>Estratégias de regulação</span></div>
+      </div>
+      <div class="demo-stage">
+        <div style="font-size:.9rem;color:var(--muted)">O que você sente no corpo agora?</div>
+        <div class="radar-body" id="radarBody">
+          <button class="sens" data-emo="Ansiedade" data-str="Respiração 4-7-8: inspire em 4, segure em 7, solte em 8. Repita 3 vezes.">Coração acelerado</button>
+          <button class="sens" data-emo="Raiva" data-str="Pausa e distância: saia do ambiente por 2 minutos antes de responder.">Calor no rosto / mãos tensas</button>
+          <button class="sens" data-emo="Sobrecarga sensorial" data-str="Reduza o input: fones, luz baixa, um canto calmo por alguns minutos.">Barulho parece alto demais</button>
+          <button class="sens" data-emo="Tristeza" data-str="Nomeie e acolha: escreva uma frase sobre o que sente e avise alguém de confiança.">Peso no peito / cansaço</button>
+          <button class="sens" data-emo="Medo antecipatório" data-str="Ancore no concreto: liste 3 coisas que você vê e 1 primeiro passo pequeno.">Nó no estômago antes de algo</button>
+        </div>
+        <div class="radar-out" id="radarOut">
+          <div class="emo" id="radarEmo"></div>
+          <div class="str" id="radarStr"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IDEIAS -->
+    <h3 class="h-md reveal" style="margin:56px 0 4px">Mais conceitos no roadmap de jogos</h3>
+    <p class="muted reveal" style="margin-bottom:6px">Cada um mapeado a um alvo clínico e a uma trilha.</p>
+    <div class="idea-grid">
+      <div class="idea reveal"><span class="emoji">💬</span><h4>Conversa em Camadas</h4><p>Diálogo com ramificações: escolhas revelam como iniciar, manter e encerrar uma conversa lendo o contexto.</p><span class="tag">Habilidades sociais · Jovem + Adulto</span></div>
+      <div class="idea reveal"><span class="emoji">🗺️</span><h4>Mapa da Rotina</h4><p>Planejador visual gamificado: montar a semana, encaixar imprevistos, ganhar pontos por consistência.</p><span class="tag">Funções executivas · Jovem</span></div>
+      <div class="idea reveal"><span class="emoji">🎯</span><h4>Missões da Semana</h4><p>Sistema de quests do mundo real com conquistas — o motor de generalização in vivo entre sessões.</p><span class="tag">Generalização · Jovem + Adulto</span></div>
+      <div class="idea reveal"><span class="emoji">🧑‍💼</span><h4>Simulador de Entrevista</h4><p>Role-play de entrevista e situações de trabalho, com feedback estruturado sobre fala, escuta e postura.</p><span class="tag">Inserção · Adulto</span></div>
+      <div class="idea reveal"><span class="emoji">🏙️</span><h4>Cidade Social</h4><p>Simulação de navegação social: pedir ajuda, resolver um imprevisto no transporte, lidar com o inesperado.</p><span class="tag">Autonomia · Adulto</span></div>
+      <div class="idea reveal"><span class="emoji">🌡️</span><h4>Termômetro Sensorial</h4><p>Mapeia gatilhos sensoriais e associa cada um a uma estratégia de regulação personalizada.</p><span class="tag">Regulação sensorial · Jovem + Adulto</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- COMO COMEÇAR / ROADMAP -->
+<section class="section" id="comecar">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <div class="eyebrow">Como começar</div>
+      <h2 class="h-lg">Um caminho de implementação<br>em seis passos.</h2>
+      <p class="lead">Recomendação: pilotar <b style="color:var(--ink)">uma</b> trilha primeiro. A Jovem tem alta aderência a jogos e engajamento da família; a Adulto tem a sinergia Callink e ROI mais direto. Escolha uma como coorte-piloto e a outra como a segunda.</p>
+    </div>
+    <div class="road">
+      <div class="step reveal"><div class="n"><i></i>Fase 0</div><h4>Escopo</h4><p>Personas, teoria de mudança, nome e identidade da marca.</p><div class="dur">2–3 semanas</div></div>
+      <div class="step reveal"><div class="n"><i></i>Fase 1</div><h4>Desenho clínico</h4><p>Protocolos, currículo sessão a sessão e o POP da devolutiva-ponte.</p><div class="dur">3–4 semanas</div></div>
+      <div class="step reveal"><div class="n"><i></i>Fase 2</div><h4>Time</h4><p>Coordenador, psicólogo e TO. Capacitação e passagem de bastão.</p><div class="dur">em paralelo</div></div>
+      <div class="step reveal"><div class="n"><i></i>Fase 3</div><h4>Integração ao funil</h4><p>O "momento da ponte" na devolutiva, padronizado em POP.</p><div class="dur">contínuo</div></div>
+      <div class="step reveal"><div class="n"><i></i>Fase 4</div><h4>Piloto medido</h4><p>1 trilha, 6–8 pacientes, preço-piloto, mede antes/depois.</p><div class="dur">3–4 meses</div></div>
+      <div class="step reveal"><div class="n"><i></i>Fase 5</div><h4>Escala</h4><p>Precifica, empacota e replica coortes em calendário rotativo.</p><div class="dur">após o piloto</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section" id="cta" style="padding-top:20px">
+  <div class="wrap">
+    <div class="cta reveal">
+      <h2 class="h-lg">O funil já existe. Falta o próximo degrau.</h2>
+      <p>O primeiro passo concreto é o desenho da trilha-piloto: currículo sessão a sessão, os jogos daquele público, os instrumentos e o roteiro da devolutiva que faz a ponte da avaliação para o programa.</p>
+      <a href="#top" class="btn btn-primary">Desenhar a trilha-piloto
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <div class="brand" style="margin-bottom:8px"><span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="#160f2e" stroke-width="2.2" stroke-linecap="round"><path d="M4 12h4l2-6 4 12 2-6h4"/></svg></span> Equilibrium <span style="color:var(--aqua-soft)">Trilhas</span></div>
+      <p class="muted" style="font-size:.85rem;max-width:44ch">Programa de neurodesenvolvimento continuado para adolescentes e adultos. Grupo Equilibrium · Uberlândia, MG.</p>
+    </div>
+    <div class="owner" style="text-align:right">
+      <div>Projeto de <b>André Marques</b></div>
+      <div class="muted" style="margin-top:6px">Documento conceitual · versão de apresentação</div>
+    </div>
+  </div>
+</footer>
+<script>
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- NAV ---------- */
+const nav=document.getElementById('nav');
+addEventListener('scroll',()=>nav.classList.toggle('scrolled',scrollY>40));
+document.getElementById('burger').addEventListener('click',()=>{
+  document.querySelector('.nav-links').style.display='flex';
+  document.querySelector('.nav-links').style.cssText='display:flex;position:absolute;top:100%;left:0;right:0;flex-direction:column;background:rgba(20,16,43,.97);padding:20px 26px;gap:16px;border-bottom:1px solid var(--line)';
+});
+
+/* ---------- THREE.JS NEURAL HERO ---------- */
+(function(){
+  const canvas=document.getElementById('neural');
+  if(!window.THREE) return;
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(60,1,.1,1000); cam.position.z=52;
+  const group=new THREE.Group(); scene.add(group);
+  const N=window.innerWidth<720?60:110, R=42;
+  const pos=[], vel=[];
+  for(let i=0;i<N;i++){
+    pos.push(new THREE.Vector3((Math.random()-.5)*R*2,(Math.random()-.5)*R*1.3,(Math.random()-.5)*R*1.4));
+    vel.push(new THREE.Vector3((Math.random()-.5)*.02,(Math.random()-.5)*.02,(Math.random()-.5)*.02));
+  }
+  const gm=new THREE.SphereGeometry(.5,10,10);
+  const m1=new THREE.MeshBasicMaterial({color:0x9D7BFF}), m2=new THREE.MeshBasicMaterial({color:0x5AE9C8});
+  const nodes=pos.map((p,i)=>{const s=new THREE.Mesh(gm,i%3===0?m2:m1);s.position.copy(p);group.add(s);return s;});
+  const lineMat=new THREE.LineBasicMaterial({color:0x7C5CFC,transparent:true,opacity:.16});
+  let lines=new THREE.LineSegments(new THREE.BufferGeometry(),lineMat); group.add(lines);
+  function rebuild(){
+    const v=[];
+    for(let i=0;i<N;i++)for(let j=i+1;j<N;j++){
+      const d=pos[i].distanceTo(pos[j]);
+      if(d<15){v.push(pos[i].x,pos[i].y,pos[i].z,pos[j].x,pos[j].y,pos[j].z);}
+    }
+    lines.geometry.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
+  }
+  const mouse={x:0,y:0};
+  addEventListener('mousemove',e=>{mouse.x=(e.clientX/innerWidth-.5);mouse.y=(e.clientY/innerHeight-.5);});
+  function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();}
+  addEventListener('resize',resize); resize();
+  let t=0;
+  function loop(){
+    t+=.003;
+    for(let i=0;i<N;i++){
+      pos[i].add(vel[i]);
+      ['x','y','z'].forEach((a,k)=>{const lim=[R,R*.65,R*.7][k];if(pos[i][a]>lim||pos[i][a]<-lim)vel[i][a]*=-1;});
+      nodes[i].position.copy(pos[i]);
+    }
+    rebuild();
+    group.rotation.y=t+mouse.x*.5;
+    group.rotation.x=mouse.y*.35;
+    renderer.render(scene,cam);
+    requestAnimationFrame(loop);
+  }
+  rebuild();
+  if(RM){renderer.render(scene,cam);} else {loop();}
+})();
+
+/* ---------- GSAP SCROLL ---------- */
+if(window.gsap && !RM){
+  gsap.registerPlugin(ScrollTrigger);
+  gsap.utils.toArray('.reveal').forEach((el,i)=>{
+    gsap.to(el,{opacity:1,y:0,duration:.8,ease:'power3.out',
+      scrollTrigger:{trigger:el,start:'top 86%'}});
+  });
+  // trail fill
+  const fill=document.getElementById('trailFill');
+  if(fill){
+    ScrollTrigger.create({trigger:'#trail',start:'top 60%',end:'bottom 70%',scrub:.5,
+      onUpdate:s=>{fill.style.height=(s.progress*100)+'%';
+        const phases=gsap.utils.toArray('.phase');
+        phases.forEach((p,i)=>p.classList.toggle('on', s.progress>= i/(phases.length)));
+      }});
+  }
+  // bars
+  ScrollTrigger.create({trigger:'#bars',start:'top 80%',once:true,
+    onEnter:()=>document.querySelectorAll('.bar-fill').forEach(b=>b.style.width=b.dataset.w+'%')});
+  // counters
+  gsap.utils.toArray('[data-count]').forEach(el=>{
+    ScrollTrigger.create({trigger:el,start:'top 88%',once:true,onEnter:()=>{
+      const end=+el.dataset.count, suf=el.dataset.suffix||''; let o={v:0};
+      gsap.to(o,{v:end,duration:1.2,ease:'power2.out',onUpdate:()=>el.textContent=Math.round(o.v)+suf});
+    }});
+  });
+} else {
+  document.querySelectorAll('.reveal').forEach(e=>{e.style.opacity=1;e.style.transform='none';});
+  document.querySelectorAll('.bar-fill').forEach(b=>b.style.width=b.dataset.w+'%');
+  document.querySelectorAll('[data-count]').forEach(el=>el.textContent=el.dataset.count+(el.dataset.suffix||''));
+  document.querySelectorAll('.phase').forEach(p=>p.classList.add('on'));
+  const f=document.getElementById('trailFill'); if(f)f.style.height='100%';
+}
+
+/* ---------- TRILHA TABS ---------- */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    const t=tab.dataset.t;
+    document.querySelectorAll('.trilha').forEach(tr=>tr.classList.toggle('active',tr.dataset.trilha===t));
+  });
+});
+
+/* ---------- GAME: LEITURA DE PISTAS ---------- */
+const faces=[
+  {emo:'Alegria', opts:['Alegria','Tristeza','Raiva','Medo'], mouth:'M34 62 Q50 76 66 62', browsY:32, eyes:4.5, color:'#5AE9C8'},
+  {emo:'Tristeza', opts:['Surpresa','Tristeza','Alegria','Nojo'], mouth:'M34 70 Q50 60 66 70', browsY:34, eyes:4, color:'#9D7BFF', browTilt:'in'},
+  {emo:'Raiva', opts:['Raiva','Medo','Alegria','Tristeza'], mouth:'M36 68 Q50 64 64 68', browsY:30, eyes:4, color:'#FF8A5B', browTilt:'angry'},
+  {emo:'Surpresa', opts:['Raiva','Surpresa','Tristeza','Tédio'], mouth:'M50 66 m-7 0 a7 7 0 1 0 14 0 a7 7 0 1 0 -14 0', browsY:26, eyes:6, color:'#FFC24B'},
+  {emo:'Medo', opts:['Medo','Alegria','Raiva','Calma'], mouth:'M40 70 Q50 64 60 70', browsY:27, eyes:6, color:'#9D7BFF', browTilt:'in'}
+];
+let fIdx=-1, fRight=0, fRounds=0, fLock=false;
+const faceEl={mouth:document.getElementById('mouth'),bl:document.getElementById('bl'),br:document.getElementById('br'),
+  eyes:document.getElementById('eyes'),opts:document.getElementById('emoOptions'),fb:document.getElementById('faceFb'),score:document.getElementById('faceScore')};
+function setBrows(f){
+  const y=f.browsY;
+  if(f.browTilt==='angry'){faceEl.bl.setAttribute('x1',30);faceEl.bl.setAttribute('y1',y);faceEl.bl.setAttribute('x2',44);faceEl.bl.setAttribute('y2',y+6);
+    faceEl.br.setAttribute('x1',56);faceEl.br.setAttribute('y1',y+6);faceEl.br.setAttribute('x2',70);faceEl.br.setAttribute('y2',y);}
+  else if(f.browTilt==='in'){faceEl.bl.setAttribute('x1',30);faceEl.bl.setAttribute('y1',y+5);faceEl.bl.setAttribute('x2',44);faceEl.bl.setAttribute('y2',y);
+    faceEl.br.setAttribute('x1',56);faceEl.br.setAttribute('y1',y);faceEl.br.setAttribute('x2',70);faceEl.br.setAttribute('y2',y+5);}
+  else{faceEl.bl.setAttribute('x1',30);faceEl.bl.setAttribute('y1',y);faceEl.bl.setAttribute('x2',44);faceEl.bl.setAttribute('y2',y);
+    faceEl.br.setAttribute('x1',56);faceEl.br.setAttribute('y1',y);faceEl.br.setAttribute('x2',70);faceEl.br.setAttribute('y2',y);}
+}
+function nextFace(){
+  fLock=false;
+  let n; do{n=Math.floor(Math.random()*faces.length);}while(n===fIdx); fIdx=n;
+  const f=faces[fIdx];
+  faceEl.mouth.setAttribute('d',f.mouth); faceEl.mouth.setAttribute('stroke',f.color);
+  faceEl.eyes.querySelectorAll('circle').forEach(c=>c.setAttribute('r',f.eyes));
+  setBrows(f);
+  faceEl.fb.textContent='Que emoção é esta?'; faceEl.fb.style.color='var(--muted)';
+  const shuffled=[...f.opts].sort(()=>Math.random()-.5);
+  faceEl.opts.innerHTML='';
+  shuffled.forEach(o=>{
+    const b=document.createElement('button'); b.className='emo-btn'; b.textContent=o;
+    b.onclick=()=>{
+      if(fLock)return; fLock=true; fRounds++;
+      if(o===f.emo){b.classList.add('right'); fRight++; faceEl.fb.textContent='Acertou! '+f.emo; faceEl.fb.style.color='var(--aqua-soft)';}
+      else{b.classList.add('wrong'); [...faceEl.opts.children].find(x=>x.textContent===f.emo)?.classList.add('right');
+        faceEl.fb.textContent='Era '+f.emo; faceEl.fb.style.color='var(--coral)';}
+      faceEl.score.textContent='Acertos: '+fRight+' / rodadas: '+fRounds;
+      setTimeout(nextFace,1400);
+    };
+    faceEl.opts.appendChild(b);
+  });
+}
+nextFace();
+
+/* ---------- GAME: RADAR EMOCIONAL ---------- */
+const radarOut=document.getElementById('radarOut');
+document.querySelectorAll('.sens').forEach(s=>{
+  s.addEventListener('click',()=>{
+    document.querySelectorAll('.sens').forEach(x=>x.classList.remove('active'));
+    s.classList.add('active');
+    document.getElementById('radarEmo').textContent='Provável: '+s.dataset.emo;
+    document.getElementById('radarStr').textContent='Estratégia — '+s.dataset.str;
+    radarOut.classList.add('show');
+  });
+});
+</script>
+</body>
+</html>
